@@ -1,18 +1,22 @@
-FROM python:3.9-slim
+FROM python:3.11-slim-bookworm
 
-# Устанавливаем только необходимые зависимости
+# Системные зависимости
 RUN apt-get update && apt-get install -y \
     libsndfile1 \
+    gcc \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+# Копируем зависимости
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Кэширование модели (опционально)
-RUN python -c "from transformers import pipeline; pipeline('automatic-speech-recognition', model='bond005/wav2vec2-large-ru-golos')"
+# Устанавливаем пакеты
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
+# Копируем исходный код
 COPY . .
 
 EXPOSE 5000
